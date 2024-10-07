@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Motion Permission</title>
+</head>
+<body>
+    <h1>Shake Your iPhone!</h1>
+    <p id="motionData">Click the button to start detecting motion.</p>
+    <button id="startButton">Enable Motion Detection</button>
+
+    <script>
+        // Function to request permission for motion access on iOS 13+
+        function requestMotionPermission() {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                // For iOS 13+, request permission
+                DeviceMotionEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        startDetectingMotion(); // Start detecting motion after permission is granted
+                    } else {
+                        alert('Permission to access motion data denied.');
+                    }
+                })
+                .catch(console.error);
+            } else {
+                // If not iOS or permission is not required, start detecting motion directly
+                startDetectingMotion();
+            }
+        }
+
+        // Function to start detecting device motion
+        function startDetectingMotion() {
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', function(event) {
+                    let x = event.acceleration.x;
+                    let y = event.acceleration.y;
+                    let z = event.acceleration.z;
+
+                    // Display motion data
+                    document.getElementById('motionData').innerHTML = 
+                        `Acceleration X: ${x}<br>
+                        Acceleration Y: ${y}<br>
+                        Acceleration Z: ${z}`;
+
+                    // Detect significant movement (i.e., shake)
+                    if (Math.abs(x) > 10 || Math.abs(y) > 10 || Math.abs(z) > 10) {
+                        alert('Your phone is shaking!');
+                    }
+                });
+            } else {
+                alert('DeviceMotion is not supported on this device.');
+            }
+        }
+
+        // Add event listener to button to request permission on click
+        document.getElementById('startButton').addEventListener('click', requestMotionPermission);
+    </script>
+</body>
+</html>
