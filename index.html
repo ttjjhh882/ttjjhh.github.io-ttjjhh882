@@ -3,59 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Motion Permission</title>
+    <title>iPhone XYZ Position Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .status {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        #coordinates {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Shake Your iPhone!</h1>
-    <p id="motionData">Click the button to start detecting motion.</p>
-    <button id="startButton">Enable Motion Detection</button>
+    <h1>iPhone XYZ Coordinate Change Detection</h1>
+    <p class="status">Waiting for motion updates...</p>
+    <div id="coordinates">X: 0, Y: 0, Z: 0</div>
 
     <script>
-        // Function to request permission for motion access on iOS 13+
-        function requestMotionPermission() {
-            if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                // For iOS 13+, request permission
-                DeviceMotionEvent.requestPermission()
-                .then(permissionState => {
-                    if (permissionState === 'granted') {
-                        startDetectingMotion(); // Start detecting motion after permission is granted
-                    } else {
-                        alert('Permission to access motion data denied.');
-                    }
-                })
-                .catch(console.error);
-            } else {
-                // If not iOS or permission is not required, start detecting motion directly
-                startDetectingMotion();
-            }
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', function(event) {
+                var acceleration = event.accelerationIncludingGravity;
+
+                var x = acceleration.x.toFixed(2);
+                var y = acceleration.y.toFixed(2);
+                var z = acceleration.z.toFixed(2);
+
+                document.querySelector('.status').textContent = 'Motion detected!';
+                document.getElementById('coordinates').textContent = 
+                    'X: ' + x + ' m/s², Y: ' + y + ' m/s², Z: ' + z + ' m/s²';
+            });
+        } else {
+            document.querySelector('.status').textContent = 'Device motion not supported.';
         }
-
-        // Function to start detecting device motion
-        function startDetectingMotion() {
-            if (window.DeviceMotionEvent) {
-                window.addEventListener('devicemotion', function(event) {
-                    let x = event.acceleration.x;
-                    let y = event.acceleration.y;
-                    let z = event.acceleration.z;
-
-                    // Display motion data
-                    document.getElementById('motionData').innerHTML = 
-                        `Acceleration X: ${x}<br>
-                        Acceleration Y: ${y}<br>
-                        Acceleration Z: ${z}`;
-
-                    // Detect significant movement (i.e., shake)
-                    if (Math.abs(x) > 10 || Math.abs(y) > 10 || Math.abs(z) > 10) {
-                        alert('Your phone is shaking!');
-                    }
-                });
-            } else {
-                alert('DeviceMotion is not supported on this device.');
-            }
-        }
-
-        // Add event listener to button to request permission on click
-        document.getElementById('startButton').addEventListener('click', requestMotionPermission);
     </script>
 </body>
 </html>
